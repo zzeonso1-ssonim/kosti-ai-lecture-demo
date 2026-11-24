@@ -1,0 +1,95 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>국회 요구자료 답변 도우미 · 시연</title>
+<style>
+body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;margin:0;background:#eef2f5;color:#1d2a36}
+.wrap{max-width:1100px;margin:0 auto;padding:22px}h1{font-size:22px;color:#12395b;margin:0 0 4px}.desc{color:#5b6b78;font-size:13.5px;margin:0 0 14px;line-height:1.6}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}.steps div{background:#fff;border:1px solid #d6dee5;padding:8px 10px;font-size:12.5px;line-height:1.45}.steps b{color:#12395b;display:block;font-size:12px}
+.ask{background:#fff;border:1px solid #d6dee5;padding:12px}.ask input{width:100%;box-sizing:border-box;font-size:15px;padding:10px;border:1px solid #b9c7d3}
+.ex{margin-top:8px;font-size:12.5px;color:#5b6b78}.ex button{border:1px solid #b9c7d3;background:#fff;border-radius:12px;padding:3px 9px;margin:3px 4px 0 0;cursor:pointer;font-size:12.5px}
+.go{background:#12395b;color:#fff;border:0;padding:9px 18px;font-size:14px;cursor:pointer;margin-top:10px}
+.card{background:#fff;border:1px solid #d6dee5;margin-top:14px}.card>.t{background:#12395b;color:#fff;padding:8px 12px;font-weight:700;display:flex;justify-content:space-between}.card>.t span{font-weight:400;font-size:12px;opacity:.85}
+.sec{padding:10px 12px;border-top:1px solid #e3e9ee}.sec h3{margin:0 0 6px;font-size:13px;color:#12395b}
+.tabs button{border:1px solid #b9c7d3;background:#fff;padding:4px 10px;cursor:pointer;font-size:12.5px;margin-right:4px}.tabs button.on{background:#12395b;color:#fff;border-color:#12395b}
+table{border-collapse:collapse;font-size:12.5px;margin-top:6px}td,th{border:1px solid #c9d3db;padding:4px 7px;text-align:right}th{background:#eef2f5;text-align:center}td:first-child{text-align:left}
+.carry{background:#dcebf7}.in{background:#fff2cc;color:#8a6d00}.sent{font-size:13px;line-height:1.7;margin:6px 0 0}
+.warn{background:#fff6e0;border-left:3px solid #e0b85a;padding:6px 10px;font-size:12.5px;margin:4px 0;line-height:1.5}.ok{background:#eaf5ee;border-left:3px solid #4f9a6a;padding:6px 10px;font-size:12.5px;margin:4px 0}
+.small{font-size:12px;color:#5b6b78}.none{background:#fff;border:1px solid #d6dee5;padding:14px;margin-top:14px;font-size:13.5px}
+a{color:#155681}
+</style></head><body><div class="wrap">
+<h1>국회 요구자료 답변 도우미</h1>
+<p class="desc">요구받은 질문을 넣으면 과거 제출본(DB)에서 같은 질문을 찾아, 연도별 답변을 보여주고 올해 예상답변 초안을 만듭니다.<br>시연 DB: 국가철도공단 국정감사 국토교통위원회 공통요구자료 2023·2024·2025년판(공개). 실제 운영에서는 기관 내부의 과거 제출본과 내부 AI를 씁니다.</p>
+<div class="steps"><div><b>1 목적</b>요약: 작년 질문에 올해 사실을 채움</div><div><b>2 레퍼런스</b>직전 연도(2025년판) 제출본</div><div><b>3 DB</b>과거 제출본 3개년 + 담당 부서 자료</div><div><b>4 데이터 기준</b>기준일·단위·연도 창</div><div><b>5 검증</b>합계 대조, 전년 숫자 잔존, 항목명 변경</div></div>
+<div class="ask"><input id="q" placeholder="예: 최근 3년간 민원 처리 현황을 제출해 주십시오"><div class="ex">예시 질문 <span id="exs"></span></div><button class="go" id="go">찾기 + 예상답변 만들기</button> <a href="assembly_2026_template.html" target="_blank" style="font-size:13px;margin-left:10px">전체 2026년판 틀 보기</a></div>
+<div id="out"></div>
+<p class="small" style="margin-top:18px">원문: 국가철도공단 정보마당 › 국정감사 요구자료 (kr.or.kr/boardCnts/list.do?boardID=1100044). 예상답변은 과거 답변의 구조·갱신 규칙을 적용한 초안이며, 노란 칸은 담당자가 내부자료로 채웁니다.</p>
+</div>
+<script>
+const DB=[
+{id:'budget',title:'예산 및 기금 집행현황',toc:'나',kw:['예산','집행','집행률','기금','예산현액','잔액','사업비','관리비','차입'],
+ rule:'제목 연도·기준일 갱신 → 금액단위는 직전 연도(억원) 유지 → 숫자 전부 담당자 입력 → 설명 문장은 입력값으로 계산',
+ owner:'예산 담당(예시)',
+ years:{
+ 2023:{basis:'9.21일 기준',unit:'백만원',head:['예산과목',"'23년 예산현액",'집행실적','%','잔액'],rows:[['계','119,351','50,178','42.0','69,173'],['사업비','88,773','36,458','41.1','52,315'],['관리비','3,129','1,745','55.8','1,384'],['차입원리금','27,411','11,975','43.7','15,436'],['예비비','38','-','0.0','38']],sent:"'23년 예산현액 11조 9,351억원에 대비 5조 178억원을 집행(42.0%)하고, 6조 9,172억원(58.0%) 집행추진 중"},
+ 2024:{basis:'9.25일 기준',unit:'억원',head:['예산과목',"'24년 예산현액",'집행실적','%','잔액'],rows:[['계','125,607','60,934','48.5','64,673'],['사업비','93,960','46,605','49.6','47,355'],['관리비','3,136','1,787','57.0','1,349'],['차입원리금','28,474','12,542','44.0','15,932'],['예비비','38','0','0.0','38']],sent:"'24년 예산현액 12조 5,607억원에 대비 6조 934억원을 집행(48.5%)하고, 6조 4,673억원(51.5%) 집행추진 중"},
+ 2025:{basis:'9.25일 기준',unit:'억원',head:['예산과목',"'25년 예산현액",'집행실적','%','잔액'],rows:[['계','118,542','65,811','55.5','52,731'],['사업비','87,939','48,188','54.8','39,751'],['관리비','3,324','1,814','54.6','1,510'],['차입원리금','27,279','15,809','58.0','11,470'],['예비비','0','0','0','0']],sent:"'25년 예산현액 11조 8,542억원 대비 6조 5,811억원을 집행(55.5%)하고, 5조 2,731억원(44.5%) 집행추진 중"}},
+ checks:[['warn','금액 단위가 2023년판 백만원 → 2024년판부터 억원으로 바뀜. 2023년 표의 숫자(예: 계 119,351)는 문장 기준으로 억원 값임. 올해도 억원 유지'],['warn','기준일이 9.21(2023) → 9.25(2024·2025). 올해 기준일 확인 필요'],['ok','% = 집행실적 ÷ 예산현액, 잔액 = 예산현액 − 집행실적으로 입력값 자동 검산 가능']]},
+{id:'budget_detail',title:'세부 사업별 예산집행 현황',toc:'나',kw:['세부','사업별','세부사업','고속철도','일반철도','광역철도','사업명'],
+ rule:'제목 연도 갱신 → 단위 백만원 유지 → 합계는 요약표 계(억원)×100과 일치해야 함',owner:'예산 담당(예시)',
+ years:{2023:{basis:'',unit:'백만원',head:['사업명',"'23년예산(A)",'집행실적(B)','B/A(%)','잔액'],rows:[['합계','11,935,052','5,017,843','42.0','6,917,209'],['사업비계','8,877,280','3,645,810','41.1','5,231,470']],sent:''},
+ 2024:{basis:'',unit:'백만원',head:['사업명',"'24년예산(A)",'집행실적(B)','B/A(%)','잔액'],rows:[['합계','11,935,052','5,017,843','42.0','6,917,209'],['사업비계','8,877,280','3,645,810','41.1','5,231,470']],sent:''},
+ 2025:{basis:'',unit:'백만원',head:['사업명',"'25년예산(A)",'집행실적(B)','B/A(%)','잔액'],rows:[['합계','11,854,183','6,581,206','55.5','5,272,977'],['사업비계','8,793,912','4,818,823','54.8','3,975,089']],sent:''}},
+ checks:[['warn','2024년판 세부표 합계·사업비계가 2023년판과 한 자리도 다르지 않음(11,935,052 / 42.0%). 같은 2024년판 요약표는 125,607억원·48.5%. 전년 표가 갱신되지 않고 남은 것으로 보임(원인 미확인)'],['ok','2025년판은 세부표 합계 11,854,183백만원 = 요약표 118,542억원으로 일치']]},
+{id:'civil_year',title:'민원 처리현황 (연도별)',toc:'마',kw:['민원','처리','국민신문고','접수','서면','전자','연도별','3년'],
+ rule:'맨 앞 연도 삭제 → 작년은 8월 기준을 연간 확정치로 교체 → 올해 8월 기준 추가 → 직전 연도 연간치는 그대로 이월',owner:'민원 담당(예시)',
+ years:{2023:{basis:'8월 기준',unit:'건',head:['구분','2021년','2022년','2023년(8월 기준)'],rows:[['합계','13,379','7,611','6,345'],['서면','696','791','1,098'],['전자','12,683','6,820','5,247']],sent:'2023년(8월 기준) 국민신문고 접수 민원 총 6,345건'},
+ 2024:{basis:'8월 기준',unit:'건',head:['구분','2022년','2023년','2024년(8월 기준)'],rows:[['합계','7,611','24,558','15,129'],['서면','791','764','887'],['전자','6,820','23,794','14,242']],sent:'2024년(8월 기준) 국민신문고 접수 민원 총 15,129건'},
+ 2025:{basis:'8월 기준',unit:'건',head:['구분','2023년','2024년','2025년(8월 기준)'],rows:[['합계','24,558','21,139','8,792'],['서면','764','686','253'],['전자','23,794','20,453','8,539']],sent:'2025년(8월 기준) 국민신문고 접수 민원 총 8,792건'}},
+ checks:[['warn','2023년판의 2023년(8월 기준) 서면 1,098건이 2024년판의 2023년 연간 서면 764건보다 많음. 연간치가 8월까지 수치보다 작아 분류 기준 확인 필요'],['warn','항목명: 2023년판 "서신민원·사이버 민원" → 2024년판부터 "서신민원·전자민원"'],['ok','이월 확인: 2025년판 2023년 24,558건 = 2024년판 2023년 24,558건']]},
+{id:'civil_type',title:'민원 처리현황 (유형별)',toc:'마',kw:['유형','유형별','분야','공사','설계','소음','용지','재산'],
+ rule:'연도 창 이동은 연도별 표와 같음 → 분류 체계는 직전 연도(7개) 기준',owner:'민원 담당(예시)',
+ years:{2023:{basis:'8월 기준',unit:'건',head:['구분','계','기획','공사','설계','소음','시설','용지','재산','기타'],rows:[['2021년','13,379','36','1,620','6,980','684','2,481','168','695','715'],['2022년','7,611','590','1,953','737','642','1,223','405','1,217','844'],['2023년(8월)','6,345','1,076','1,091','1,478','215','787','377','716','605']],sent:''},
+ 2024:{basis:'8월 기준',unit:'건',head:['구분','계','기획','공사','설계','소음','시설','용지','재산','기타'],rows:[['2022년','7,611','590','1,953','737','642','1,223','405','1,217','844'],['2023년','24,558','1,453','14,134','4,729','904','805','449','1,219','865'],['2024년(8월)','15,129','114','9,843','2,767','389','557','241','770','448']],sent:''},
+ 2025:{basis:'8월 기준',unit:'건',head:['구분','계','기획','공사','설계','시설','용지','재산','기타'],rows:[['2023년','24,558','1,453','14,290','4,732','1,553','449','1,220','861'],['2024년','21,139','309','12,981','4,274','1,271','335','1,198','771'],['2025년(8월)','8,792','160','6,318','449','739','163','643','320']],sent:''}},
+ checks:[['warn','분류가 2024년판 8개(소음 포함) → 2025년판 7개. 올해도 7개 기준'],['warn','같은 2023년 공사 민원이 2024년판 14,134건, 2025년판 14,290건. 재분류 여부 확인 필요']]},
+{id:'acrc',title:'국민권익위원회 조치요구 현황',toc:'마',kw:['권익위','국민권익위원회','조치요구','권고','시정권고','의견표명'],
+ rule:'연도 창 이동 → 올해는 1~8월 월별 → 항목명은 직전 연도 표기',owner:'민원·감사 담당(예시)',
+ years:{2023:{basis:'8월 기준',unit:'건',head:['구분','2021년','2022년','2023년(8월)'],rows:[['시정권고','2','3','1'],['의견표명','4','10','3'],['합계','6','13','4']],sent:'2023년(8월 기준) 국민권익위원회의 조치요구 사항은 총 3건'},
+ 2024:{basis:'8월 기준',unit:'건',head:['구분','2022년','2023년','2024년(8월)'],rows:[['시정권고','3','3','1'],['의견표명','10','8','2'],['합계','13','11','3']],sent:'2024년(8월 기준) 국민권익위원회의 조치요구 사항은 총 3건'},
+ 2025:{basis:'8월 기준',unit:'건',head:['구분','2023년','2024년','2025년(8월)'],rows:[['권고사항','3','1','0'],['의견표명','8','2','2'],['합계','11','3','2']],sent:'2025년(8월 기준) 국민권익위원회의 조치요구 사항은 총 2건'}},
+ checks:[['warn','2023년판 문장은 "총 3건"인데 같은 표의 2023년(8월) 합계는 4건'],['warn','항목명 "시정권고"(2023·2024년판) → "권고사항"(2025년판)'],['ok','이월 확인: 2025년판 2024년 합계 3건 = 2024년판 2024년(8월) 3건']]},
+{id:'toc',title:'공통요구자료 목차 (7개 항목)',toc:'-',kw:['목차','항목','공통요구','업무현황','감사','법령','사규','청원','지적사항'],
+ rule:'7개 항목 그대로 → 연도만 갱신 → 감사 항목은 "직전 연도 및 올해" → 청원은 "제22대 국회 이후"',owner:'기획 담당(예시)',
+ years:{2023:{basis:'',unit:'',head:['번호','항목'],rows:[['Ⅰ','2023년도 업무현황'],['Ⅱ','2023년도 예산 및 기금 집행현황'],['Ⅲ','2023년도 주요 정책 및 사업의 추진현황과 그 실적'],['Ⅳ','2022년도 및 2023년도 감사원 감사 및 자체감사 지적사항 및 시정조치 결과'],['Ⅴ','2023년도 각종 민원 처리현황'],['Ⅵ','소관업무 법령·사규 제·개정, 폐지현황'],['Ⅶ','제21대 국회 이후 청원 업무처리내용']],sent:''},
+ 2024:{basis:'',unit:'',head:['번호','항목'],rows:[['가','2024년도 업무현황'],['나','2024년도 예산 및 기금 집행현황'],['다','2024년도 주요 정책 및 사업의 추진현황과 그 실적'],['라','2023년도 및 2024년도 감사원 감사 및 자체감사 지적사항 및 시정조치 결과'],['마','2024년도 각종 민원 처리현황'],['바','소관업무 법령·사규 제·개정, 폐지현황'],['사','제22대 국회 이후 청원 업무처리내용']],sent:''},
+ 2025:{basis:'',unit:'',head:['번호','항목'],rows:[['가','2025년도 업무현황'],['나','2025년도 예산 및 기금 집행현황'],['다','2025년도 주요 정책 및 사업의 추진현황과 그 실적'],['라','2024년도 및 2025년도 감사원 감사 및 자체감사 지적사항 및 시정조치 결과'],['마','2025년도 각종 민원 처리현황'],['바','소관업무 법령·사규 제·개정, 폐지현황'],['사','제22대 국회 이후 청원 업무처리내용']],sent:''}},
+ checks:[['ok','7개 항목이 3년 내내 동일'],['warn','번호 체계 Ⅰ~Ⅶ(2023) → 가~사(2024~)']]}
+];
+const EX=['최근 3년간 민원 처리 현황','올해 예산 집행률 현황','국민권익위원회 권고 현황','세부 사업별 예산 집행 현황','공통요구자료 목차'];
+const exs=document.getElementById('exs');EX.forEach(t=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{q.value=t;run()};exs.appendChild(b)});
+const q=document.getElementById('q');document.getElementById('go').onclick=run;q.onkeydown=e=>{if(e.key==='Enter')run()};
+function score(it,s){let n=0;it.kw.forEach(k=>{if(s.includes(k))n+=k.length>2?2:1});if(s.includes(it.title.slice(0,4)))n+=2;return n}
+function tbl(y,mark){return `<table><tr>${y.head.map(h=>`<th>${h}</th>`).join('')}</tr>${y.rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${mark?mark(r,i):''}">${c}</td>`).join('')}</tr>`).join('')}</table>`}
+function draft(it){const p=it.years[2025];const Y=2026;
+ // 연도창 이동형
+ if(it.id==='civil_year'||it.id==='acrc'){const head=[p.head[0],'2024년','2025년','2026년(8월 기준)'];
+   const rows=p.rows.map(r=>[r[0],r[2],'입력','입력']);
+   return {t:`<table><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr><td>${r[0]}</td><td class="carry">${r[1]}</td><td class="in">입력</td><td class="in">입력</td></tr>`).join('')}</table>`,
+   s:it.id==='civil_year'?'□ 2026년(8월 기준) 국민신문고 접수 민원 총 [입력]건':'ㅇ 2026년(8월 기준) 국민권익위원회의 조치요구 사항은 총 [입력]건'}}
+ if(it.id==='civil_type'){const rows=[['2024년',...p.rows[1].slice(1)],['2025년',...p.head.slice(1).map(()=>'입력')],['2026년(8월)',...p.head.slice(1).map(()=>'입력')]];
+   return {t:`<table><tr>${p.head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map((r,ri)=>`<tr>${r.map((c,i)=>`<td class="${i===0?'':ri===0?'carry':'in'}">${c}</td>`).join('')}</tr>`).join('')}</table>`,s:"* ('26년) [입력] 분야 순으로 발생"}}
+ if(it.id==='toc'){const rows=p.rows.map(r=>[r[0],r[1].replace('2024년도 및 2025년도','2025년도 및 2026년도').replace('2025년도','2026년도')]);return {t:`<table><tr><th>번호</th><th>항목</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td style="text-align:left" class="carry">${r[1]}</td></tr>`).join('')}</table>`,s:''}}
+ const head=p.head.map(h=>h.replace("'25","'26"));
+ return {t:`<table><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${p.rows.map(r=>`<tr><td>${r[0]}</td>${r.slice(1).map(()=>'<td class="in">입력</td>').join('')}</tr>`).join('')}</table>`,
+  s:it.id==='budget'?"□ '26년 예산현액 [입력]억원 대비 [입력]억원을 집행([입력]%)하고, [입력]억원([입력]%) 집행추진 중":'합계(백만원) ÷ 100 = 요약표 계(억원) 일치 확인'}}
+function run(){const s=q.value.trim();const out=document.getElementById('out');if(!s){return}
+ const hits=DB.map(it=>[it,score(it,s)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,2);
+ if(!hits.length){out.innerHTML=`<div class="none">과거 제출본에서 같은 질문을 찾지 못했습니다. 새로 들어온 질문으로 보고 담당 부서에 원자료를 요청합니다.</div>`;return}
+ out.innerHTML=hits.map(([it],k)=>{const d=draft(it);const p=it.years[2025];
+  return `<div class="card"><div class="t">${it.title}<span>목차 ${it.toc} · 3개년 모두 제출 · ${k===0?'가장 가까운 항목':'관련 항목'}</span></div>
+  <div class="sec"><h3>과거 답변</h3><div class="tabs" data-id="${it.id}">${[2023,2024,2025].map(y=>`<button class="${y===2025?'on':''}" data-y="${y}">${y}년판</button>`).join('')}</div><div class="past" id="past_${it.id}">${pastHtml(it,2025)}</div></div>
+  <div class="sec"><h3>2026년 예상답변 초안 <span class="small">(파랑 = 2025년판에서 이월 · 노랑 = 담당자 입력)</span></h3>
+  <div class="small">${it.years[2025].basis?'기준: '+it.years[2025].basis+' · ':''}${p.unit?'단위: '+p.unit:''}</div>${d.t}${d.s?`<p class="sent">${d.s}</p>`:''}
+  <p class="small">갱신 규칙: ${it.rule}<br>원자료: ${it.owner}</p></div>
+  <div class="sec"><h3>검증 (과거 제출본 3개년 대조 결과)</h3>${it.checks.map(c=>`<div class="${c[0]}">${c[1]}</div>`).join('')}</div></div>`}).join('');
+ document.querySelectorAll('.tabs').forEach(tb=>tb.querySelectorAll('button').forEach(b=>b.onclick=()=>{tb.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');const it=DB.find(x=>x.id===tb.dataset.id);document.getElementById('past_'+it.id).innerHTML=pastHtml(it,+b.dataset.y)}));}
+function pastHtml(it,y){const v=it.years[y];return `<div class="small">${v.basis?'기준: '+v.basis+' · ':''}${v.unit?'단위: '+v.unit:''}</div>${tbl(v)}${v.sent?`<p class="sent">${v.sent}</p>`:''}`}
+</script></body></html>
